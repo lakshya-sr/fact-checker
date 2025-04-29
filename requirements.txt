@@ -1,0 +1,7 @@
+Flask
+requests
+torch
+transformers
+yt-dlp
+sentencepiece
+langdetect
