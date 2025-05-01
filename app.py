@@ -1,4 +1,4 @@
-from flask import Flask, request, render_template_string
+from flask import Flask, request, render_template
 import subprocess
 import os
 import uuid
@@ -20,29 +20,6 @@ asr_pipeline = pipeline("automatic-speech-recognition", model="openai/whisper-sm
 summarization_pipeline = pipeline("summarization", model="facebook/bart-large-cnn", device=device)
 translation_pipeline = pipeline("translation", model="facebook/m2m100_418M", device=device)
 
-# Template for simple UI
-HTML_TEMPLATE = """
-<!doctype html>
-<title>Video Fact Checker</title>
-<h1>Upload a Video URL</h1>
-<form method=post>
-  Video URL: <input type=text name=video_url>
-  <input type=submit value=Analyze>
-</form>
-{% if result %}
-<h2>Summary:</h2>
-<p>{{ result.summary }}</p>
-<h2>Fact Check Results:</h2>
-<ul>
-{% for claim in result.claims %}
-  <li><strong>{{ claim.claim_text }}</strong><br>
-      Rating: {{ claim.rating }}<br>
-      Source: <a href="{{ claim.url }}" target="_blank">{{ claim.publisher }}</a>
-  </li>
-{% endfor %}
-</ul>
-{% endif %}
-"""
 
 # Helper: download audio from video
 def download_audio(video_url):
@@ -92,26 +69,29 @@ def summarize_text(text):
     return summarized[0]['summary_text']
 
 # Helper: query fact check API
-def fact_check(text):
-    url = 'https://factchecktools.googleapis.com/v1alpha1/claims:search'
-    params = {
-        'query': text,
-        'key': GOOGLE_FACT_CHECK_API_KEY
-    }
-    response = requests.get(url, params=params)
-    claims = []
-    if response.status_code == 200:
-        data = response.json()
-        if 'claims' in data:
-            for claim in data['claims']:
-                claim_info = {
-                    'claim_text': claim.get('text', 'No text'),
-                    'rating': claim.get('claimReview', [{}])[0].get('textualRating', 'Unknown'),
-                    'publisher': claim.get('claimReview', [{}])[0].get('publisher', {}).get('name', 'Unknown'),
-                    'url': claim.get('claimReview', [{}])[0].get('url', '#')
-                }
-                claims.append(claim_info)
-    return claims
+def fact_check(statements):
+    results = {statement:[] for statement in statements}
+    for statement in statements:
+        url = 'https://factchecktools.googleapis.com/v1alpha1/claims:search'
+        params = {
+            'query': statement,
+            'key': GOOGLE_FACT_CHECK_API_KEY
+        }
+        response = requests.get(url, params=params)
+        claims = []
+        if response.status_code == 200:
+            data = response.json()
+            if 'claims' in data:
+                for claim in data['claims']:
+                    claim_info = {
+                        'claim_text': claim.get('text', 'No text'),
+                        'rating': claim.get('claimReview', [{}])[0].get('textualRating', 'Unknown'),
+                        'publisher': claim.get('claimReview', [{}])[0].get('publisher', {}).get('name', 'Unknown'),
+                        'url': claim.get('claimReview', [{}])[0].get('url', '#')
+                    }
+                    claims.append(claim_info)
+        results[statement].append(claims)
+    return results
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
@@ -126,11 +106,12 @@ def index():
         print(translated_text)
         summary = summarize_text(translated_text)
         print(summary)
-        claims = fact_check(summary)
+        statements = get_statements(summary)
+        claims = fact_check(statements)
         print(claims)
         os.remove(audio_path)  # cleanup
-        return render_template_string(HTML_TEMPLATE, result={'summary': summary, 'claims': claims if claims else [{"claim_text": "No claims found"}]})
-    return render_template_string(HTML_TEMPLATE)
+        return render_template("index.html", result={'summary': summary, 'claims': claims if claims else [{'claim_text': 'No claims found'}]})
+    return render_template("index.html")
 
 if __name__ == "__main__":
     app.run(debug=True)

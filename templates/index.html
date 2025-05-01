@@ -1,0 +1,25 @@
+<!doctype html>
+<title>Video Fact Checker</title>
+<h1>Upload a Video URL</h1>
+<form method=post>
+  Video URL: <input type=text name=video_url>
+  <input type=submit value=Analyze>
+</form>
+{% if result %}
+<h2>Summary:</h2>
+<p>{{ result.summary }}</p>
+<h2>Fact Check Results:</h2>
+<ul>
+  {% for statement in result.results %}
+    <h3>{{ statement.text }}:</h3>
+    <ul>
+    {% for claim in statement.claims %}
+      <li><strong>{{ claim.claim_text }}</strong><br>
+          Rating: {{ claim.rating }}<br>
+          Source: <a href="{{ claim.url }}" target="_blank">{{ claim.publisher }}</a>
+      </li>
+    </ul>
+  {% endfor %}
+{% endfor %}
+</ul>
+{% endif %}
