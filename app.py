@@ -68,6 +68,9 @@ def summarize_text(text):
     summarized = summarization_pipeline(text, max_length=150, min_length=50, do_sample=False)
     return summarized[0]['summary_text']
 
+def get_statements(text):
+    return text.split(".")
+
 # Helper: query fact check API
 def fact_check(statements):
     results = {statement:[] for statement in statements}
@@ -107,6 +110,7 @@ def index():
         summary = summarize_text(translated_text)
         print(summary)
         statements = get_statements(summary)
+        print(statements)
         claims = fact_check(statements)
         print(claims)
         os.remove(audio_path)  # cleanup

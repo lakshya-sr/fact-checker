@@ -1,0 +1,99 @@
+/* General Styles */
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: linear-gradient(to right, #833ab4, #fd1d1d, #fcb045);
+  background-attachment: fixed;
+  margin: 0;
+  padding: 0;
+  color: #333;
+  line-height: 1.6;
+}
+
+header, footer {
+  background-color: #833ab4;
+  color: white;
+  text-align: center;
+  padding: 1rem 0;
+}
+
+main {
+  max-width: 800px;
+  margin: 2rem auto;
+  background-color: #ffffffee;
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 0 20px rgba(0,0,0,0.1);
+}
+
+h1, h2, h3 {
+  margin-top: 0;
+  color: #833ab4;
+}
+
+section {
+  margin-bottom: 2rem;
+}
+
+/* Form Styles */
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+label {
+  font-weight: bold;
+}
+
+input[type="text"] {
+  padding: 0.75rem;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  background-color: #fafafa;
+}
+
+button {
+  padding: 0.75rem;
+  font-size: 1rem;
+  background: linear-gradient(to right, #833ab4, #fd1d1d, #fcb045);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: opacity 0.3s ease;
+}
+
+button:hover {
+  opacity: 0.9;
+}
+
+/* Fact Check Results */
+article {
+  background-color: #f9f4ff;
+  padding: 1rem;
+  border-left: 4px solid #833ab4;
+  border-radius: 6px;
+  margin-bottom: 1rem;
+}
+
+.rating {
+  color: #fd1d1d;
+  font-weight: bold;
+}
+
+a {
+  color: #833ab4;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+/* Footer */
+footer p {
+  margin: 0;
+  font-size: 0.9rem;
+}

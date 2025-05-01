@@ -1,25 +1,59 @@
 <!doctype html>
-<title>Video Fact Checker</title>
-<h1>Upload a Video URL</h1>
-<form method=post>
-  Video URL: <input type=text name=video_url>
-  <input type=submit value=Analyze>
-</form>
-{% if result %}
-<h2>Summary:</h2>
-<p>{{ result.summary }}</p>
-<h2>Fact Check Results:</h2>
-<ul>
-  {% for statement in result.results %}
-    <h3>{{ statement.text }}:</h3>
-    <ul>
-    {% for claim in statement.claims %}
-      <li><strong>{{ claim.claim_text }}</strong><br>
-          Rating: {{ claim.rating }}<br>
-          Source: <a href="{{ claim.url }}" target="_blank">{{ claim.publisher }}</a>
-      </li>
-    </ul>
-  {% endfor %}
-{% endfor %}
-</ul>
-{% endif %}
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Video Fact Checker</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+  <header>
+    <h1>Video Fact Checker</h1>
+  </header>
+
+  <main>
+    <section aria-labelledby="form-title">
+      <h2 id="form-title">Submit Instagram Reel</h2>
+      <form method="post">
+        <label for="video_url">Paste Instagram Reel URL:</label>
+        <input type="text" id="video_url" name="video_url" placeholder="https://www.instagram.com/reel/..." required>
+        <button type="submit">Analyze</button>
+      </form>
+    </section>
+
+    {% if result %}
+    <section aria-labelledby="summary-title">
+      <h2 id="summary-title">Summary</h2>
+      <p>{{ result.summary }}</p>
+    </section>
+
+    <section aria-labelledby="factcheck-title">
+      <h2 id="factcheck-title">Fact Check Results</h2>
+      {% for statement, claims_list in result.claims.items() %}
+        <article aria-labelledby="statement-{{ loop.index }}">
+          <h3 id="statement-{{ loop.index }}">Statement: {{ statement }}</h3>
+          {% if claims_list %}
+            <ul>
+              {% for claim in claims_list[0] %}
+                <li>
+                  <strong>{{ claim.claim_text }}</strong><br>
+                  <span class="rating">Rating: {{ claim.rating }}</span><br>
+                  <a href="{{ claim.url }}" target="_blank">Source: {{ claim.publisher }}</a>
+                </li>
+              {% endfor %}
+            </ul>
+          {% else %}
+            <p>No claims found for this statement.</p>
+          {% endif %}
+        </article>
+      {% endfor %}
+    </section>
+    {% endif %}
+  </main>
+
+  <footer>
+    <p>&copy; 2025 Fake News Detector. All rights reserved.</p>
+  </footer>
+
+</body>
+</html>
