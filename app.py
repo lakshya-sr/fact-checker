@@ -21,7 +21,6 @@ summarization_pipeline = pipeline("summarization", model="facebook/bart-large-cn
 translation_pipeline = pipeline("translation", model="facebook/m2m100_418M", device=device)
 
 
-# Helper: download audio from video
 def download_audio(video_url):
     output_path = f"/tmp/{uuid.uuid4()}.mp3"
     ydl_opts = {
@@ -42,12 +41,10 @@ def download_audio(video_url):
         downloaded_path = ydl.prepare_filename(info).rsplit('.', 1)[0] + '.mp3'
     return downloaded_path
 
-# Helper: transcribe audio to text
 def transcribe_audio(audio_path):
     result = asr_pipeline(audio_path, return_timestamps=True)
     return result['text']
 
-# Helper: translate text to English
 def translate_text(text):
     detected_lang = detect(text)
     print(f"Detected language: {detected_lang}")
@@ -63,7 +60,6 @@ def translate_text(text):
     )
     return translated[0]['translation_text']
 
-# Helper: summarize text
 def summarize_text(text):
     summarized = summarization_pipeline(text, max_length=150, min_length=50, do_sample=False)
     return summarized[0]['summary_text']
@@ -71,7 +67,6 @@ def summarize_text(text):
 def get_statements(text):
     return text.split(".")
 
-# Helper: query fact check API
 def fact_check(statements):
     results = {statement:[] for statement in statements}
     for statement in statements:
@@ -102,17 +97,17 @@ def index():
         video_url = request.form['video_url']
         # video_url = 'https://www.instagram.com/p/DI8PkcDs45b/'
         audio_path = download_audio(video_url)
-        print(audio_path)
+        print("Audio path:", audio_path)
         transcript = transcribe_audio(audio_path)
-        print(transcript)
+        print("Transcript:\n", transcript)
         translated_text = translate_text(transcript)
-        print(translated_text)
+        print("Translation:\n", translated_text)
         summary = summarize_text(translated_text)
-        print(summary)
+        print("Summary:\n", summary)
         statements = get_statements(summary)
-        print(statements)
+        print("Separated statements:\n", statements)
         claims = fact_check(statements)
-        print(claims)
+        print("Claims:\n", claims)
         os.remove(audio_path)  # cleanup
         return render_template("index.html", result={'summary': summary, 'claims': claims if claims else [{'claim_text': 'No claims found'}]})
     return render_template("index.html")
